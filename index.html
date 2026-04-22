@@ -171,81 +171,7 @@
         .btn-save:active { transform:scale(.985); }
         .btn-save.loading { opacity:.45; pointer-events:none; }
 
-        /* ── BOARD ── */
-        .board-header {
-            display:flex; align-items:baseline; justify-content:space-between;
-            padding:4px 20px 14px;
-        }
-        .board-title {
-            font-family:'Cormorant Garamond',serif;
-            font-size:26px; font-weight:700; color: #F8F8F8;
-        }
-        .count-pill {
-            background: rgba(255,255,255,0.08);
-            border: 1px solid rgba(255,255,255,0.12);
-            border-radius:20px; padding:4px 12px;
-            font-size:11px; color: rgba(248,248,248,0.6); font-weight:400;
-            letter-spacing:.5px;
-        }
-        .board-rule { height:1px; margin:0 20px 22px; background: rgba(255,255,255,0.1); }
 
-        .vision-grid { padding:0 16px; display:flex; flex-direction:column; gap:14px; }
-
-        /* card */
-        .vision-card {
-            background: #161616;
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius:16px; overflow:hidden;
-            opacity:0; transform:translateY(16px);
-            transition:opacity .5s, transform .5s cubic-bezier(.16,1,.3,1);
-        }
-        .vision-card.visible { opacity:1; transform:translateY(0); }
-        .vision-card:active { transform:scale(.99); }
-
-        .card-img-wrap { position:relative; }
-        .card-img { width:100%; height:190px; object-fit:cover; display:block; }
-        .card-img-overlay {
-            position:absolute; inset:0;
-            background:linear-gradient(to top, rgba(10,10,10,0.75) 0%, transparent 55%);
-        }
-        .card-no-img {
-            height:72px;
-            background: repeating-linear-gradient(45deg,
-                rgba(255,255,255,0.02) 0,rgba(255,255,255,0.02) 1px,
-                transparent 1px, transparent 12px);
-            display:flex; align-items:center; justify-content:center;
-            font-size:18px; color:rgba(255,255,255,0.1); letter-spacing:8px;
-        }
-        .card-body { padding:16px 18px 20px; }
-        .card-top { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px; }
-        .card-name {
-            font-family:'Cormorant Garamond',serif;
-            font-size:21px; font-weight:700; color: #F8F8F8; line-height:1.1;
-        }
-        .card-date {
-            font-size:10px; letter-spacing:1.5px; color:rgba(248,248,248,0.3);
-            text-transform:uppercase; font-weight:300; margin-top:3px;
-        }
-        .card-rule { height:1px; background:rgba(255,255,255,0.1); margin-bottom:12px; }
-        .card-goal {
-            font-family:'Cormorant Garamond',serif;
-            font-size:16px; font-style:italic; font-weight:400;
-            color: rgba(248,248,248,0.6); line-height:1.7;
-            position:relative; padding-left:18px;
-        }
-        .card-goal::before {
-            content:'"';
-            position:absolute; left:0; top:-4px;
-            font-size:36px; line-height:1;
-            color: rgba(255,255,255,0.12); font-style:normal;
-        }
-
-        .empty {
-            text-align:center; padding:52px 20px;
-            color: rgba(248,248,248,0.25);
-        }
-        .empty-icon { font-size:36px; margin-bottom:10px; }
-        .empty p { font-size:13px; line-height:1.7; font-weight:300; }
 
         /* ── BOTTOM SHEET ── */
         .backdrop {
@@ -399,18 +325,7 @@
         <button class="btn-save" id="saveBtn" onclick="saveVision()">Save Vision</button>
     </div>
 
-    <!-- ── BOARD (was missing — caused the null innerHTML error) ── -->
-    <div class="board-header">
-        <div class="board-title">The Board</div>
-        <div class="count-pill" id="countPill">0 visions</div>
-    </div>
-    <div class="board-rule"></div>
-    <div class="vision-grid" id="visionGrid">
-        <div class="empty">
-            <div class="empty-icon">◻</div>
-            <p>No visions yet.<br>Be the first to add yours.</p>
-        </div>
-    </div>
+
 
 </div>
 
@@ -451,7 +366,7 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyBf5IWzHviy4vayV3LwVimTl4pirHowuT0",
@@ -525,10 +440,7 @@
     }
     window.closeSheet = () => document.getElementById('backdrop').classList.remove('open');
     window.handleBackdropClick = e => { if (e.target === document.getElementById('backdrop')) window.closeSheet(); };
-    window.seeBoard = () => {
-        window.closeSheet();
-        setTimeout(() => document.getElementById('visionGrid').scrollIntoView({ behavior:'smooth', block:'start' }), 380);
-    };
+    window.seeBoard = () => { window.closeSheet(); };
 
     // ── SAVE ──
     window.saveVision = async function() {
@@ -570,48 +482,7 @@
         });
     };
 
-    // ── READ ──
-    onValue(ref(db, 'vision_goals'), snapshot => {
-        const grid = document.getElementById('visionGrid');
-        grid.innerHTML = '';
-        const data = snapshot.val();
-        if (!data) {
-            grid.innerHTML = `<div class="empty"><div class="empty-icon">◻</div><p>No visions yet.<br>Be the first to add yours.</p></div>`;
-            document.getElementById('countPill').textContent = '0 visions';
-            return;
-        }
-        const items = Object.values(data).reverse();
-        const n = items.length;
-        document.getElementById('countPill').textContent = `${n} vision${n !== 1 ? 's' : ''}`;
 
-        items.forEach((item, i) => {
-            const card = document.createElement('div');
-            card.className = 'vision-card';
-            const date = new Date(item.savedAt).toLocaleDateString('en-IN', {
-                day:'numeric', month:'short', year:'numeric'
-            });
-            card.innerHTML = `
-                ${item.base64Image
-                    ? `<div class="card-img-wrap">
-                           <img src="${item.base64Image}" class="card-img" loading="lazy">
-                           <div class="card-img-overlay"></div>
-                       </div>`
-                    : `<div class="card-no-img">✦ ✦ ✦</div>`}
-                <div class="card-body">
-                    <div class="card-top">
-                        <div>
-                            <div class="card-name">${item.name}</div>
-                            <div class="card-date">${date}</div>
-                        </div>
-                    </div>
-                    <div class="card-rule"></div>
-                    <div class="card-goal">${item.goalText}</div>
-                </div>
-            `;
-            grid.appendChild(card);
-            setTimeout(() => card.classList.add('visible'), 60 + i * 70);
-        });
-    });
 </script>
 </body>
 </html>
