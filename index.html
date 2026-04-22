@@ -98,7 +98,6 @@
             border: 1px solid rgba(255,255,255,0.1);
             border-radius: 18px;
             padding: 26px 22px;
-            box-shadow: none;
         }
 
         .form-section-label {
@@ -199,7 +198,6 @@
             border-radius:16px; overflow:hidden;
             opacity:0; transform:translateY(16px);
             transition:opacity .5s, transform .5s cubic-bezier(.16,1,.3,1);
-            box-shadow: none;
         }
         .vision-card.visible { opacity:1; transform:translateY(0); }
         .vision-card:active { transform:scale(.99); }
@@ -249,6 +247,7 @@
         .empty-icon { font-size:36px; margin-bottom:10px; }
         .empty p { font-size:13px; line-height:1.7; font-weight:300; }
 
+        /* ── BOTTOM SHEET ── */
         .backdrop {
             position:fixed; inset:0; z-index:200;
             background:rgba(0,0,0,0.75);
@@ -364,7 +363,7 @@
         <div class="topbar-sub">Vision Board</div>
     </div>
 
-    <!-- HERO (dark strip for contrast) -->
+    <!-- HERO -->
     <div class="hero">
         <div class="eyebrow">
             <div class="eyebrow-line"></div>
@@ -400,8 +399,18 @@
         <button class="btn-save" id="saveBtn" onclick="saveVision()">Save Vision</button>
     </div>
 
-    <!-- BOARD -->
-   
+    <!-- ── BOARD (was missing — caused the null innerHTML error) ── -->
+    <div class="board-header">
+        <div class="board-title">The Board</div>
+        <div class="count-pill" id="countPill">0 visions</div>
+    </div>
+    <div class="board-rule"></div>
+    <div class="vision-grid" id="visionGrid">
+        <div class="empty">
+            <div class="empty-icon">◻</div>
+            <p>No visions yet.<br>Be the first to add yours.</p>
+        </div>
+    </div>
 
 </div>
 
@@ -410,7 +419,6 @@
     <div class="sheet">
         <div class="sheet-handle"><div class="sheet-handle-bar"></div></div>
 
-        <!-- dark banner with tick + title -->
         <div class="sheet-banner">
             <div class="sheet-tick">✓</div>
             <div class="sheet-banner-text">
@@ -420,7 +428,6 @@
         </div>
 
         <div class="sheet-body">
-            <!-- mini preview of saved card -->
             <div class="mini-card" id="miniCard">
                 <div id="miniImgSlot"></div>
                 <div class="mini-card-body">
@@ -459,7 +466,7 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
-    // image preview
+    // ── image preview ──
     const fileInput = document.getElementById('imageFile');
     const imgPreview = document.getElementById('imgPreview');
     const uploadFname = document.getElementById('uploadFname');
@@ -474,22 +481,41 @@
         r.readAsDataURL(file);
     });
 
-    // toast
+    // ── toast ──
     function showErr(msg) {
         const t = document.getElementById('errToast');
         t.textContent = msg; t.classList.add('show');
         setTimeout(() => t.classList.remove('show'), 3000);
     }
 
-    // base64
-    const toB64 = file => new Promise((res,rej) => {
-        const r = new FileReader();
-        r.readAsDataURL(file);
-        r.onload = () => res(r.result);
-        r.onerror = e => rej(e);
-    });
+    /**
+     * FIX #2 — Compress image before saving to Firebase.
+     * Firebase Realtime DB has a 10 MB node limit; raw base64 of a phone photo
+     * can easily exceed that. We down-scale to max 800 px wide and encode at
+     * 70 % JPEG quality, keeping the result well under ~300 KB base64.
+     */
+    function compressImage(file, maxPx = 800, quality = 0.7) {
+        return new Promise((resolve, reject) => {
+            const img = new Image();
+            const url = URL.createObjectURL(file);
+            img.onload = () => {
+                URL.revokeObjectURL(url);
+                let { width, height } = img;
+                if (width > maxPx || height > maxPx) {
+                    if (width >= height) { height = Math.round(height * maxPx / width); width = maxPx; }
+                    else                 { width = Math.round(width * maxPx / height); height = maxPx; }
+                }
+                const canvas = document.createElement('canvas');
+                canvas.width = width; canvas.height = height;
+                canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+                resolve(canvas.toDataURL('image/jpeg', quality));
+            };
+            img.onerror = reject;
+            img.src = url;
+        });
+    }
 
-    // sheet controls
+    // ── sheet controls ──
     function openSheet(name, goal, imgSrc) {
         document.getElementById('miniName').textContent = name;
         document.getElementById('miniGoal').textContent = goal;
@@ -504,7 +530,7 @@
         setTimeout(() => document.getElementById('visionGrid').scrollIntoView({ behavior:'smooth', block:'start' }), 380);
     };
 
-    // SAVE
+    // ── SAVE ──
     window.saveVision = async function() {
         const name = document.getElementById('userName').value.trim();
         const goal = document.getElementById('goalText').value.trim();
@@ -515,9 +541,17 @@
         btn.classList.add('loading'); btn.textContent = 'Saving…';
 
         let b64 = '';
-        if (fileInput.files.length > 0) b64 = await toB64(fileInput.files[0]);
+        if (fileInput.files.length > 0) {
+            try {
+                b64 = await compressImage(fileInput.files[0]);
+            } catch {
+                b64 = ''; // skip image on compression error, don't block save
+            }
+        }
 
-        const key = name.replace(/[.#$\[\]/]/g, '_');
+        // Sanitise key: Firebase disallows . # $ [ ] /
+        const key = name.replace(/[.#$\[\]/\s]/g, '_') + '_' + Date.now();
+
         set(ref(db, 'vision_goals/' + key), {
             name, goalText: goal, base64Image: b64,
             savedAt: new Date().toISOString()
@@ -528,11 +562,15 @@
             fileInput.value = '';
             imgPreview.style.display = 'none';
             uploadFname.style.display = 'none';
-        }).catch(() => showErr('⚠ Error saving, try again.'))
-        .finally(() => { btn.classList.remove('loading'); btn.textContent = 'Save Vision'; });
+        }).catch(err => {
+            console.error(err);
+            showErr('⚠ Error saving, try again.');
+        }).finally(() => {
+            btn.classList.remove('loading'); btn.textContent = 'Save Vision';
+        });
     };
 
-    // READ
+    // ── READ ──
     onValue(ref(db, 'vision_goals'), snapshot => {
         const grid = document.getElementById('visionGrid');
         grid.innerHTML = '';
@@ -544,7 +582,7 @@
         }
         const items = Object.values(data).reverse();
         const n = items.length;
-        document.getElementById('countPill').textContent = `${n} vision${n!==1?'s':''}`;
+        document.getElementById('countPill').textContent = `${n} vision${n !== 1 ? 's' : ''}`;
 
         items.forEach((item, i) => {
             const card = document.createElement('div');
