@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <title>Studio 5 — Vision Board</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0A0A0A;
+            --white: #F8F8F8;
+            --black: #111111;
+            --dark: #F8F8F8;
+            --mid: rgba(248,248,248,0.55);
+            --light: rgba(248,248,248,0.35);
+            --border: rgba(255,255,255,0.1);
+            --border-dark: rgba(255,255,255,0.2);
+            --card-bg: #161616;
+            --input-bg: rgba(255,255,255,0.05);
+            --accent: #F8F8F8;
+        }
+
+        * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: #0A0A0A;
+            color: #F8F8F8;
+            min-height: 100vh;
+        }
+
+        .page { max-width:480px; margin:0 auto; padding-bottom:80px; }
+
+        /* ── TOP BAR ── */
+        .topbar {
+            display:flex; align-items:center; justify-content:space-between;
+            padding:20px 22px 18px;
+            background: #111111;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            position: sticky; top: 0; z-index: 10;
+        }
+        .logo {
+            font-family:'Cormorant Garamond',serif;
+            font-size:22px; font-weight:700; letter-spacing:.04em;
+            color: #F8F8F8;
+        }
+        .logo-dot {
+            display:inline-block; width:5px; height:5px;
+            background: #F8F8F8; border-radius:50%;
+            margin-left:2px; vertical-align:super;
+        }
+        .topbar-sub {
+            font-size:10px; letter-spacing:3px;
+            text-transform:uppercase; color: rgba(248,248,248,0.4); font-weight:400;
+        }
+
+        /* ── HERO ── */
+        .hero {
+            background: var(--black);
+            padding: 42px 24px 38px;
+            position: relative;
+            overflow: hidden;
+        }
+        .hero::before {
+            content:'';
+            position:absolute; top:-40px; right:-40px;
+            width:180px; height:180px;
+            border-radius:50%;
+            border: 1px solid rgba(255,255,255,0.07);
+        }
+        .hero::after {
+            content:'';
+            position:absolute; bottom:-60px; left:-20px;
+            width:140px; height:140px;
+            border-radius:50%;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .eyebrow {
+            display:flex; align-items:center; gap:10px; margin-bottom:16px;
+        }
+        .eyebrow-line { width:28px; height:1px; background:rgba(255,255,255,0.3); }
+        .eyebrow-text {
+            font-size:10px; letter-spacing:3.5px; text-transform:uppercase;
+            color:rgba(255,255,255,0.5); font-weight:300;
+        }
+        .hero h1 {
+            font-family:'Cormorant Garamond',serif;
+            font-size:46px; line-height:1.05; font-weight:400;
+            color: #FFFFFF; margin-bottom:12px;
+        }
+        .hero h1 em { font-style:italic; font-weight:400; }
+        .hero p { font-size:13px; color:rgba(255,255,255,0.55); line-height:1.75; font-weight:300; }
+
+        /* ── FORM CARD ── */
+        .form-card {
+            margin: 20px 16px 28px;
+            background: #161616;
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 18px;
+            padding: 26px 22px;
+            box-shadow: none;
+        }
+
+        .form-section-label {
+            font-size:9px; letter-spacing:3.5px; text-transform:uppercase;
+            color: rgba(248,248,248,0.4); font-weight:500;
+            margin-bottom:22px;
+            display:flex; align-items:center; gap:10px;
+        }
+        .form-section-label::after { content:''; flex:1; height:1px; background:rgba(255,255,255,0.1); }
+
+        .field { margin-bottom:18px; }
+        .field label {
+            display:block; font-size:11px; letter-spacing:2px;
+            text-transform:uppercase; color: rgba(248,248,248,0.85);
+            font-weight:500; margin-bottom:8px;
+        }
+        .field input[type="text"],
+        .field textarea {
+            width:100%;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius:10px;
+            padding:14px 16px;
+            font-family:'Outfit',sans-serif; font-size:15px; font-weight:400;
+            color: #F8F8F8; outline:none; resize:none;
+            transition: border-color .2s, box-shadow .2s, background .2s;
+        }
+        .field input::placeholder,
+        .field textarea::placeholder { color: rgba(248,248,248,0.45); }
+        .field input:focus,
+        .field textarea:focus {
+            border-color: rgba(255,255,255,0.4);
+            background: rgba(255,255,255,0.08);
+            box-shadow: 0 0 0 3px rgba(255,255,255,0.05);
+        }
+
+        /* upload */
+        .upload-box {
+            border: 1.5px dashed rgba(255,255,255,0.15);
+            border-radius:10px; padding:22px 16px;
+            text-align:center; cursor:pointer;
+            position:relative; overflow:hidden;
+            background: rgba(255,255,255,0.04);
+            transition: border-color .2s, background .2s;
+        }
+        .upload-box:hover { border-color: rgba(255,255,255,0.35); background: rgba(255,255,255,0.07); }
+        .upload-box input[type="file"] {
+            position:absolute; inset:0; opacity:0;
+            width:100%; height:100%; cursor:pointer;
+        }
+        .upload-icon { font-size:22px; margin-bottom:6px; display:block; }
+        .upload-hint { font-size:13px; color: rgba(248,248,248,0.85); font-weight:300; }
+        .upload-hint b { color: #F8F8F8; font-weight:600; }
+        .upload-fname { margin-top:8px; font-size:12px; color:rgba(248,248,248,0.6); display:none; font-style:italic; }
+        .img-preview {
+            width:100%; border-radius:8px; display:none;
+            margin-top:10px; max-height:130px;
+            object-fit:cover; border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .btn-save {
+            width:100%; padding:16px;
+            background: #F8F8F8; border:none; border-radius:10px;
+            font-family:'Outfit',sans-serif; font-size:13px; font-weight:600;
+            letter-spacing:2px; text-transform:uppercase;
+            color: #111111; cursor:pointer;
+            transition: opacity .2s, transform .15s;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+        }
+        .btn-save:hover { opacity:.86; }
+        .btn-save:active { transform:scale(.985); }
+        .btn-save.loading { opacity:.45; pointer-events:none; }
+
+        /* ── BOARD ── */
+        .board-header {
+            display:flex; align-items:baseline; justify-content:space-between;
+            padding:4px 20px 14px;
+        }
+        .board-title {
+            font-family:'Cormorant Garamond',serif;
+            font-size:26px; font-weight:700; color: #F8F8F8;
+        }
+        .count-pill {
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius:20px; padding:4px 12px;
+            font-size:11px; color: rgba(248,248,248,0.6); font-weight:400;
+            letter-spacing:.5px;
+        }
+        .board-rule { height:1px; margin:0 20px 22px; background: rgba(255,255,255,0.1); }
+
+        .vision-grid { padding:0 16px; display:flex; flex-direction:column; gap:14px; }
+
+        /* card */
+        .vision-card {
+            background: #161616;
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius:16px; overflow:hidden;
+            opacity:0; transform:translateY(16px);
+            transition:opacity .5s, transform .5s cubic-bezier(.16,1,.3,1);
+            box-shadow: none;
+        }
+        .vision-card.visible { opacity:1; transform:translateY(0); }
+        .vision-card:active { transform:scale(.99); }
+
+        .card-img-wrap { position:relative; }
+        .card-img { width:100%; height:190px; object-fit:cover; display:block; }
+        .card-img-overlay {
+            position:absolute; inset:0;
+            background:linear-gradient(to top, rgba(10,10,10,0.75) 0%, transparent 55%);
+        }
+        .card-no-img {
+            height:72px;
+            background: repeating-linear-gradient(45deg,
+                rgba(255,255,255,0.02) 0,rgba(255,255,255,0.02) 1px,
+                transparent 1px, transparent 12px);
+            display:flex; align-items:center; justify-content:center;
+            font-size:18px; color:rgba(255,255,255,0.1); letter-spacing:8px;
+        }
+        .card-body { padding:16px 18px 20px; }
+        .card-top { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px; }
+        .card-name {
+            font-family:'Cormorant Garamond',serif;
+            font-size:21px; font-weight:700; color: #F8F8F8; line-height:1.1;
+        }
+        .card-date {
+            font-size:10px; letter-spacing:1.5px; color:rgba(248,248,248,0.3);
+            text-transform:uppercase; font-weight:300; margin-top:3px;
+        }
+        .card-rule { height:1px; background:rgba(255,255,255,0.1); margin-bottom:12px; }
+        .card-goal {
+            font-family:'Cormorant Garamond',serif;
+            font-size:16px; font-style:italic; font-weight:400;
+            color: rgba(248,248,248,0.6); line-height:1.7;
+            position:relative; padding-left:18px;
+        }
+        .card-goal::before {
+            content:'"';
+            position:absolute; left:0; top:-4px;
+            font-size:36px; line-height:1;
+            color: rgba(255,255,255,0.12); font-style:normal;
+        }
+
+        .empty {
+            text-align:center; padding:52px 20px;
+            color: rgba(248,248,248,0.25);
+        }
+        .empty-icon { font-size:36px; margin-bottom:10px; }
+        .empty p { font-size:13px; line-height:1.7; font-weight:300; }
+
+        .backdrop {
+            position:fixed; inset:0; z-index:200;
+            background:rgba(0,0,0,0.75);
+            backdrop-filter:blur(8px);
+            display:flex; align-items:flex-end;
+            opacity:0; pointer-events:none;
+            transition:opacity .3s;
+        }
+        .backdrop.open { opacity:1; pointer-events:all; }
+
+        .sheet {
+            width:100%; max-width:480px; margin:0 auto;
+            background: #181818;
+            border:1px solid rgba(255,255,255,0.12);
+            border-bottom:none;
+            border-radius:22px 22px 0 0;
+            padding-bottom:44px;
+            transform:translateY(100%);
+            transition:transform .45s cubic-bezier(.16,1,.3,1);
+            overflow:hidden;
+            box-shadow: 0 -8px 40px rgba(0,0,0,0.5);
+        }
+        .backdrop.open .sheet { transform:translateY(0); }
+
+        .sheet-handle { display:flex; justify-content:center; padding:14px 0 0; margin-bottom:8px; }
+        .sheet-handle-bar { width:36px; height:4px; background:rgba(255,255,255,0.15); border-radius:2px; }
+
+        .sheet-banner {
+            background: #F8F8F8;
+            padding: 20px 26px 18px;
+            margin-bottom: 24px;
+            display: flex; align-items: center; gap: 14px;
+        }
+        .sheet-tick {
+            width:44px; height:44px; flex-shrink:0;
+            background: #111111;
+            border-radius:50%;
+            display:flex; align-items:center; justify-content:center;
+            font-size:20px; color:#F8F8F8;
+            animation: pop .5s .1s cubic-bezier(.34,1.56,.64,1) both;
+        }
+        @keyframes pop {
+            from { opacity:0; transform:scale(.3); }
+            to   { opacity:1; transform:scale(1); }
+        }
+        .sheet-title {
+            font-family:'Cormorant Garamond',serif;
+            font-size:26px; font-weight:700; color:#111111;
+            line-height:1;
+        }
+        .sheet-desc { font-size:12px; color:rgba(17,17,17,0.55); font-weight:300; margin-top:3px; }
+
+        .sheet-body { padding:0 22px; }
+
+        .mini-card {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius:14px; overflow:hidden; margin-bottom:20px;
+        }
+        .mini-card-img { width:100%; height:120px; object-fit:cover; display:block; }
+        .mini-card-body { padding:14px 16px 16px; }
+        .mini-name {
+            font-family:'Cormorant Garamond',serif;
+            font-size:19px; font-weight:700; color:#F8F8F8; margin-bottom:6px;
+        }
+        .mini-goal { font-size:13px; color:rgba(248,248,248,0.55); font-weight:300; font-style:italic; line-height:1.6; }
+
+        .sheet-scroll-hint {
+            text-align:center; font-size:12px; letter-spacing:.5px;
+            color:rgba(248,248,248,0.25); font-weight:300; margin-bottom:20px;
+        }
+
+        .sheet-btns { display:flex; gap:10px; }
+        .btn-dismiss {
+            flex:1; padding:14px;
+            background: rgba(255,255,255,0.07);
+            border:1px solid rgba(255,255,255,0.1); border-radius:10px;
+            font-family:'Outfit',sans-serif; font-size:12px; font-weight:500;
+            letter-spacing:1.5px; text-transform:uppercase;
+            color:rgba(248,248,248,0.6); cursor:pointer; transition:background .2s;
+        }
+        .btn-dismiss:hover { background:rgba(255,255,255,0.12); }
+        .btn-see {
+            flex:2; padding:14px;
+            background:#F8F8F8; border:none; border-radius:10px;
+            font-family:'Outfit',sans-serif; font-size:12px; font-weight:600;
+            letter-spacing:1.5px; text-transform:uppercase;
+            color:#111111; cursor:pointer; transition:opacity .2s;
+        }
+        .btn-see:hover { opacity:.86; }
+
+        .err-toast {
+            position:fixed; bottom:28px; left:50%;
+            transform:translateX(-50%) translateY(60px);
+            background: #1c1c1c;
+            border: 1px solid rgba(255,255,255,0.13);
+            color:rgba(248,248,248,.8); padding:12px 22px;
+            border-radius:40px; font-size:13px; font-weight:400;
+            z-index:300; white-space:nowrap;
+            transition:transform .35s cubic-bezier(.16,1,.3,1);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+        }
+        .err-toast.show { transform:translateX(-50%) translateY(0); }
+    </style>
+</head>
+<body>
+
+<div class="page">
+
+    <!-- TOP BAR -->
+    <div class="topbar">
+        <div class="logo">Studio 5<span class="logo-dot"></span></div>
+        <div class="topbar-sub">Vision Board</div>
+    </div>
+
+    <!-- HERO (dark strip for contrast) -->
+    <div class="hero">
+        <div class="eyebrow">
+            <div class="eyebrow-line"></div>
+            <div class="eyebrow-text">Dream it. Own it.</div>
+        </div>
+        <h1>Your Vision,<br><em>Your Future</em></h1>
+        <p>Share your goal with the Studio 5 family<br>and manifest it into reality.</p>
+    </div>
+
+    <!-- FORM -->
+    <div class="form-card">
+        <div class="form-section-label">Add Your Vision</div>
+
+        <div class="field">
+            <label>Your Name</label>
+            <input type="text" id="userName" placeholder="e.g. Priya Maurya">
+        </div>
+        <div class="field">
+            <label>Your Vision Goal</label>
+            <textarea id="goalText" rows="3" placeholder="I want to achieve..."></textarea>
+        </div>
+        <div class="field">
+            <label>Inspiration Image</label>
+            <div class="upload-box">
+                <input type="file" id="imageFile" accept="image/*">
+                <span class="upload-icon">📎</span>
+                <div class="upload-hint"><b>Tap to upload</b> your inspiration</div>
+                <div class="upload-fname" id="uploadFname"></div>
+            </div>
+            <img class="img-preview" id="imgPreview" alt="Preview">
+        </div>
+
+        <button class="btn-save" id="saveBtn" onclick="saveVision()">Save Vision</button>
+    </div>
+
+    <!-- BOARD -->
+    <div class="board-header">
+        <div class="board-title">Team Visions</div>
+        <div class="count-pill" id="countPill">0 visions</div>
+    </div>
+    <div class="board-rule"></div>
+    <div class="vision-grid" id="visionGrid">
+        <div class="empty">
+            <div class="empty-icon">◻</div>
+            <p>No visions yet.<br>Be the first to add yours.</p>
+        </div>
+    </div>
+
+</div>
+
+<!-- SUCCESS BOTTOM SHEET -->
+<div class="backdrop" id="backdrop" onclick="handleBackdropClick(event)">
+    <div class="sheet">
+        <div class="sheet-handle"><div class="sheet-handle-bar"></div></div>
+
+        <!-- dark banner with tick + title -->
+        <div class="sheet-banner">
+            <div class="sheet-tick">✓</div>
+            <div class="sheet-banner-text">
+                <div class="sheet-title">Vision Saved!</div>
+                <div class="sheet-desc">Added to the Studio 5 Vision Board</div>
+            </div>
+        </div>
+
+        <div class="sheet-body">
+            <!-- mini preview of saved card -->
+            <div class="mini-card" id="miniCard">
+                <div id="miniImgSlot"></div>
+                <div class="mini-card-body">
+                    <div class="mini-name" id="miniName"></div>
+                    <div class="mini-goal" id="miniGoal"></div>
+                </div>
+            </div>
+
+            <div class="sheet-scroll-hint">↓ Scroll down to see your vision on the board</div>
+
+            <div class="sheet-btns">
+                <button class="btn-dismiss" onclick="closeSheet()">Close</button>
+                <button class="btn-see" onclick="seeBoard()">See My Vision ↓</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- error toast -->
+<div class="err-toast" id="errToast"></div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyBf5IWzHviy4vayV3LwVimTl4pirHowuT0",
+        authDomain: "studio-5-fms.firebaseapp.com",
+        databaseURL: "https://studio-5-fms-default-rtdb.firebaseio.com",
+        projectId: "studio-5-fms",
+        storageBucket: "studio-5-fms.firebasestorage.app",
+        messagingSenderId: "1000166319814",
+        appId: "1:1000166319814:web:09a6f279d21fe417e8d9c7"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    // image preview
+    const fileInput = document.getElementById('imageFile');
+    const imgPreview = document.getElementById('imgPreview');
+    const uploadFname = document.getElementById('uploadFname');
+
+    fileInput.addEventListener('change', () => {
+        const file = fileInput.files[0];
+        if (!file) return;
+        uploadFname.textContent = '📷 ' + file.name;
+        uploadFname.style.display = 'block';
+        const r = new FileReader();
+        r.onload = e => { imgPreview.src = e.target.result; imgPreview.style.display = 'block'; };
+        r.readAsDataURL(file);
+    });
+
+    // toast
+    function showErr(msg) {
+        const t = document.getElementById('errToast');
+        t.textContent = msg; t.classList.add('show');
+        setTimeout(() => t.classList.remove('show'), 3000);
+    }
+
+    // base64
+    const toB64 = file => new Promise((res,rej) => {
+        const r = new FileReader();
+        r.readAsDataURL(file);
+        r.onload = () => res(r.result);
+        r.onerror = e => rej(e);
+    });
+
+    // sheet controls
+    function openSheet(name, goal, imgSrc) {
+        document.getElementById('miniName').textContent = name;
+        document.getElementById('miniGoal').textContent = goal;
+        const slot = document.getElementById('miniImgSlot');
+        slot.innerHTML = imgSrc ? `<img src="${imgSrc}" class="mini-card-img">` : '';
+        document.getElementById('backdrop').classList.add('open');
+    }
+    window.closeSheet = () => document.getElementById('backdrop').classList.remove('open');
+    window.handleBackdropClick = e => { if (e.target === document.getElementById('backdrop')) window.closeSheet(); };
+    window.seeBoard = () => {
+        window.closeSheet();
+        setTimeout(() => document.getElementById('visionGrid').scrollIntoView({ behavior:'smooth', block:'start' }), 380);
+    };
+
+    // SAVE
+    window.saveVision = async function() {
+        const name = document.getElementById('userName').value.trim();
+        const goal = document.getElementById('goalText').value.trim();
+        if (!name) { showErr('⚠ Please enter your name'); return; }
+        if (!goal) { showErr('⚠ Please enter your vision goal'); return; }
+
+        const btn = document.getElementById('saveBtn');
+        btn.classList.add('loading'); btn.textContent = 'Saving…';
+
+        let b64 = '';
+        if (fileInput.files.length > 0) b64 = await toB64(fileInput.files[0]);
+
+        const key = name.replace(/[.#$\[\]/]/g, '_');
+        set(ref(db, 'vision_goals/' + key), {
+            name, goalText: goal, base64Image: b64,
+            savedAt: new Date().toISOString()
+        }).then(() => {
+            openSheet(name, goal, b64 || null);
+            document.getElementById('userName').value = '';
+            document.getElementById('goalText').value = '';
+            fileInput.value = '';
+            imgPreview.style.display = 'none';
+            uploadFname.style.display = 'none';
+        }).catch(() => showErr('⚠ Error saving, try again.'))
+        .finally(() => { btn.classList.remove('loading'); btn.textContent = 'Save Vision'; });
+    };
+
+    // READ
+    onValue(ref(db, 'vision_goals'), snapshot => {
+        const grid = document.getElementById('visionGrid');
+        grid.innerHTML = '';
+        const data = snapshot.val();
+        if (!data) {
+            grid.innerHTML = `<div class="empty"><div class="empty-icon">◻</div><p>No visions yet.<br>Be the first to add yours.</p></div>`;
+            document.getElementById('countPill').textContent = '0 visions';
+            return;
+        }
+        const items = Object.values(data).reverse();
+        const n = items.length;
+        document.getElementById('countPill').textContent = `${n} vision${n!==1?'s':''}`;
+
+        items.forEach((item, i) => {
+            const card = document.createElement('div');
+            card.className = 'vision-card';
+            const date = new Date(item.savedAt).toLocaleDateString('en-IN', {
+                day:'numeric', month:'short', year:'numeric'
+            });
+            card.innerHTML = `
+                ${item.base64Image
+                    ? `<div class="card-img-wrap">
+                           <img src="${item.base64Image}" class="card-img" loading="lazy">
+                           <div class="card-img-overlay"></div>
+                       </div>`
+                    : `<div class="card-no-img">✦ ✦ ✦</div>`}
+                <div class="card-body">
+                    <div class="card-top">
+                        <div>
+                            <div class="card-name">${item.name}</div>
+                            <div class="card-date">${date}</div>
+                        </div>
+                    </div>
+                    <div class="card-rule"></div>
+                    <div class="card-goal">${item.goalText}</div>
+                </div>
+            `;
+            grid.appendChild(card);
+            setTimeout(() => card.classList.add('visible'), 60 + i * 70);
+        });
+    });
+</script>
+</body>
+</html>
